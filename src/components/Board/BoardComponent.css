@@ -1,0 +1,187 @@
+.board-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.board {
+  position: relative;
+  background: #f5deb3;
+  padding: 40px;
+  border: 3px solid #8b4513;
+  border-radius: 10px;
+}
+
+.board-grid {
+  position: relative;
+  width: 560px;  /* 8格 × 70px */
+  height: 630px; /* 9格 × 70px */
+}
+
+/* 横线 */
+.horizontal-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #8b4513;
+}
+
+/* 竖线 */
+.vertical-line {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  background: #8b4513;
+}
+
+/* 楚河汉界之间的竖线只画上下半段 */
+.vertical-line.split-top {
+  height: 315px; /* 到第4.5行 */
+}
+
+.vertical-line.split-bottom {
+  top: 315px;
+  height: 315px; /* 从第4.5行开始 */
+}
+
+.vertical-line.full {
+  height: 100%;
+}
+
+/* 九宫格斜线 - 使用SVG线条更精确 */
+.palace-line {
+  position: absolute;
+  height: 2px;
+  background: #8b4513;
+  transform-origin: left center;
+}
+
+/* 黑方九宫格（y=0到y=2, x=3到x=5）
+   从左上角(x=3,y=0)到右下角(x=5,y=2) */
+.palace-line.black-diagonal-1 {
+  left: 210px;    /* x=3 */
+  top: 0px;       /* y=0 */
+  width: 198.99px; /* sqrt(140^2 + 140^2) */
+  transform: rotate(45deg);
+}
+
+/* 从右上角(x=5,y=0)到左下角(x=3,y=2) */
+.palace-line.black-diagonal-2 {
+  left: 350px;    /* x=5 */
+  top: 0px;       /* y=0 */
+  width: 198.99px;
+  transform: rotate(135deg);
+}
+
+/* 红方九宫格（y=7到y=9, x=3到x=5）
+   从左上角(x=3,y=7)到右下角(x=5,y=9) */
+.palace-line.red-diagonal-1 {
+  left: 210px;    /* x=3 */
+  top: 490px;     /* y=7 */
+  width: 198.99px;
+  transform: rotate(45deg);
+}
+
+/* 从右上角(x=5,y=7)到左下角(x=3,y=9) */
+.palace-line.red-diagonal-2 {
+  left: 350px;    /* x=5 */
+  top: 490px;     /* y=7 */
+  width: 198.99px;
+  transform: rotate(135deg);
+}
+
+/* 楚河汉界文字 */
+.river-label {
+  position: absolute;
+  top: 305px;
+  font-size: 28px;
+  color: #8b4513;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+.river-label.chu {
+  left: 90px;
+  letter-spacing: 12px;
+}
+
+.river-label.han {
+  right: 90px;
+  letter-spacing: 12px;
+}
+
+/* 交叉点（用于放置棋子） */
+.intersection {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  margin-left: -35px;
+  margin-top: -35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.intersection:hover {
+  background-color: rgba(255, 255, 200, 0.4);
+}
+
+.intersection.selected {
+  background-color: rgba(100, 200, 255, 0.5);
+}
+
+.intersection.valid-move {
+  background-color: rgba(100, 255, 100, 0.3);
+}
+
+.intersection.valid-move::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+/* 棋子 */
+.piece {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 10;
+}
+
+.piece:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.piece.red {
+  background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+  color: #fff;
+  border: 3px solid #c92a2a;
+  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.piece.black {
+  background: linear-gradient(145deg, #4a4a4a, #2d2d2d);
+  color: #fff;
+  border: 3px solid #1a1a1a;
+  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
+}

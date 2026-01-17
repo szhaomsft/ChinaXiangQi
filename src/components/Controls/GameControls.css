@@ -1,0 +1,74 @@
+.game-controls {
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.game-controls h2 {
+  color: #333;
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.control-section {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.control-section h3 {
+  color: #495057;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.control-section button {
+  width: 100%;
+  padding: 12px;
+  margin: 5px 0;
+  background: linear-gradient(145deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.control-section button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.control-section button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.control-section button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status-section {
+  background: #e9ecef;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.status-section h3 {
+  color: #495057;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.status-section p {
+  color: #212529;
+  font-size: 16px;
+  margin: 8px 0;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+}
