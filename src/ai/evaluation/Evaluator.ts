@@ -1,20 +1,25 @@
 import { Board } from '../../core/board/Board';
 import { Color } from '../../types';
-import { Piece } from '../../core/pieces/Piece';
+import { PositionTables } from './PositionTables';
 
 export class Evaluator {
   evaluate(board: Board, color: Color): number {
     let score = 0;
 
-    // 子力价值评估
+    // 1. 子力价值和位置价值一起计算（优化性能）
     const pieces = board.getAllPieces();
     for (const piece of pieces) {
-      const value = piece.getValue();
-      score += piece.color === Color.RED ? value : -value;
-    }
+      const materialValue = piece.getValue();
+      const positionValue = PositionTables.getValue(
+        piece.type,
+        piece.position.x,
+        piece.position.y,
+        piece.color === Color.RED
+      );
 
-    // 灵活性评估（走法数量）
-    // 省略以提高速度
+      const totalValue = materialValue + positionValue * 0.2;
+      score += piece.color === Color.RED ? totalValue : -totalValue;
+    }
 
     return color === Color.RED ? score : -score;
   }

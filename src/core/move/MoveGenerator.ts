@@ -17,7 +17,7 @@ export class MoveGenerator {
             const capturedPiece = board.getPiece(to);
             const move = new Move(piece.position, to, piece, capturedPiece);
 
-            // 验证移动后不会被将军
+            // 验证移动后不会被将军且不会导致白脸将
             if (this.isLegalMove(board, move)) {
               moves.push(move);
             }
@@ -42,7 +42,16 @@ export class MoveGenerator {
     const kingPos = testBoard.getKingPosition(move.piece.color);
     if (!kingPos) return false;
 
-    return !this.isPositionUnderAttack(testBoard, kingPos, move.piece.color);
+    if (this.isPositionUnderAttack(testBoard, kingPos, move.piece.color)) {
+      return false;
+    }
+
+    // 检查白脸将（将帅对面）
+    if (this.isFlyingKing(testBoard)) {
+      return false;
+    }
+
+    return true;
   }
 
   private isPositionUnderAttack(board: Board, pos: Position, color: Color): boolean {
@@ -56,6 +65,28 @@ export class MoveGenerator {
     }
 
     return false;
+  }
+
+  private isFlyingKing(board: Board): boolean {
+    const redKingPos = board.getKingPosition(Color.RED);
+    const blackKingPos = board.getKingPosition(Color.BLACK);
+
+    if (!redKingPos || !blackKingPos) return false;
+
+    // 不在同一列
+    if (redKingPos.x !== blackKingPos.x) return false;
+
+    // 检查中间是否有棋子
+    const minY = Math.min(redKingPos.y, blackKingPos.y);
+    const maxY = Math.max(redKingPos.y, blackKingPos.y);
+
+    for (let y = minY + 1; y < maxY; y++) {
+      if (board.getPiece(new Position(redKingPos.x, y)) !== null) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   makeMove(board: Board, move: Move): void {

@@ -15,6 +15,7 @@ interface GameContextValue {
   isAIThinking: boolean;
   selectedPosition: Position | null;
   validMoves: Position[];
+  lastMove: Move | null;
 
   makeMove: (move: Move) => Promise<void>;
   selectPosition: (pos: Position) => void;
@@ -28,7 +29,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const gameManagerRef = useRef(new GameManager());
   const moveGeneratorRef = useRef(new MoveGenerator());
 
-  const [board, setBoard] = useState(gameManagerRef.current.getBoard());
+  const [board, setBoard] = useState(() => gameManagerRef.current.getBoard().clone());
   const [currentPlayer, setCurrentPlayer] = useState(gameManagerRef.current.getCurrentPlayer());
   const [gameMode, setGameMode] = useState(gameManagerRef.current.getGameMode());
   const [difficulty, setDifficulty] = useState(gameManagerRef.current.getDifficulty());
@@ -36,6 +37,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const [lastMove, setLastMove] = useState<Move | null>(null);
 
   const updateGameState = useCallback(() => {
     setBoard(gameManagerRef.current.getBoard().clone());
@@ -49,30 +51,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setIsAIThinking(true);
     try {
       const aiMove = await gameManagerRef.current.requestAIMove();
+      setLastMove(aiMove);
       gameManagerRef.current.makeMove(aiMove);
       updateGameState();
+
+      setIsAIThinking(false);
+
+      // AI vs AI模式：等待动画播放完成后再继续
+      if (gameMode === GameMode.AI_VS_AI && gameManagerRef.current.getGameStatus() === GameStatus.PLAYING) {
+        setTimeout(() => {
+          triggerAIMove();
+        }, 1200); // 1.2秒延迟，让玩家能看清楚移动
+      }
     } catch (e) {
       console.error('AI move error:', e);
-    } finally {
       setIsAIThinking(false);
     }
-  }, [gameStatus, updateGameState]);
+  }, [gameStatus, updateGameState, gameMode]);
 
   const makeMove = useCallback(async (move: Move) => {
+    setLastMove(move);
     gameManagerRef.current.makeMove(move);
     updateGameState();
     setSelectedPosition(null);
     setValidMoves([]);
 
-    // 如果是AI回合，触发AI移动
+    // 玩家vs AI模式：如果是AI回合，触发AI移动
     if (gameMode === GameMode.PLAYER_VS_AI && gameManagerRef.current.getCurrentPlayer() === Color.BLACK) {
       setTimeout(() => {
         triggerAIMove();
       }, 500);
-    } else if (gameMode === GameMode.AI_VS_AI) {
-      setTimeout(() => {
-        triggerAIMove();
-      }, 1000);
     }
   }, [gameMode, updateGameState, triggerAIMove]);
 
@@ -97,10 +105,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         makeMove(move);
       } else {
         // 重新选择
-        setSelectedPosition(null);
-        setValidMoves([]);
         if (piece && piece.color === currentPlayer) {
-          selectPosition(pos);
+          // 直接切换到新选择的棋子
+          const moves = moveGeneratorRef.current.generateLegalMoves(board, currentPlayer);
+          const pieceMoves = moves.filter(m => m.from.equals(pos));
+          setSelectedPosition(pos);
+          setValidMoves(pieceMoves.map(m => m.to));
+        } else {
+          // 取消选择
+          setSelectedPosition(null);
+          setValidMoves([]);
         }
       }
     }
@@ -117,6 +131,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     updateGameState();
     setSelectedPosition(null);
     setValidMoves([]);
+    setLastMove(null);
   }, [gameMode, updateGameState]);
 
   const newGame = useCallback((mode: GameMode, diff: DifficultyLevel) => {
@@ -126,6 +141,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     updateGameState();
     setSelectedPosition(null);
     setValidMoves([]);
+    setLastMove(null);
     setIsAIThinking(false);
 
     // 如果是AI vs AI，立即开始
@@ -145,6 +161,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     isAIThinking,
     selectedPosition,
     validMoves,
+    lastMove,
     makeMove,
     selectPosition,
     undoMove,

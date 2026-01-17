@@ -63,7 +63,20 @@ export class GameManager {
 
     // 执行移动
     this.moveGenerator.makeMove(this.board, move);
-    this.history.addMove(move, this.board.getHash());
+    const boardHash = this.board.getHash();
+
+    console.log('📝 移动:', {
+      moveCount: this.history.getMoves().length + 1,
+      from: move.from.toString(),
+      to: move.to.toString(),
+      piece: move.piece.type,
+      capturedPiece: move.capturedPiece?.type || 'none',
+      boardHash: boardHash,
+      boardHashHex: '0x' + boardHash.toString(16),
+      allHashesAfterMove: [...this.history.getBoardHashes(), boardHash]
+    });
+
+    this.history.addMove(move, boardHash);
 
     // 切换玩家
     this.currentPlayer = oppositeColor(this.currentPlayer);
@@ -117,18 +130,21 @@ export class GameManager {
   }
 
   private checkGameStatus(): GameStatus {
-    // 检查将死
+    // 检查将死（最高优先级）
     if (this.checkDetector.isCheckmate(this.board, this.currentPlayer)) {
+      console.log('✅ 将死检测:', this.currentPlayer === Color.RED ? '黑方胜' : '红方胜');
       return this.currentPlayer === Color.RED ? GameStatus.BLACK_WIN : GameStatus.RED_WIN;
     }
 
     // 检查困毙
     if (this.checkDetector.isStalemate(this.board, this.currentPlayer)) {
+      console.log('✅ 困毙检测: 和棋');
       return GameStatus.DRAW;
     }
 
-    // 检查和棋
+    // 检查和棋（最低优先级）
     if (this.drawDetector.isDraw(this.history)) {
+      console.log('✅ 和棋检测: 和棋');
       return GameStatus.DRAW;
     }
 

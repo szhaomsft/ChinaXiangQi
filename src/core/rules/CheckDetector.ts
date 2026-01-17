@@ -23,8 +23,7 @@ export class CheckDetector {
       }
     }
 
-    // 检查白脸将
-    return this.isFlyingKing(board);
+    return false;
   }
 
   isCheckmate(board: Board, color: Color): boolean {

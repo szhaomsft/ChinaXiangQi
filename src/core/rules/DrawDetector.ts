@@ -1,8 +1,20 @@
-import { GameHistory } from '../game/GameHistory';
+import { GameHistory } from '../../game/GameHistory';
 
 export class DrawDetector {
   isDraw(history: GameHistory): boolean {
-    return this.isDrawByMoveCount(history) || this.isDrawByRepetition(history);
+    const byMoveCount = this.isDrawByMoveCount(history);
+    const byRepetition = this.isDrawByRepetition(history);
+
+    if (byMoveCount || byRepetition) {
+      console.log('🔴 和棋检测:', {
+        byMoveCount,
+        byRepetition,
+        totalMoves: history.getMoves().length,
+        totalHashes: history.getBoardHashes().length
+      });
+    }
+
+    return byMoveCount || byRepetition;
   }
 
   isDrawByMoveCount(history: GameHistory): boolean {
@@ -14,7 +26,12 @@ export class DrawDetector {
       movesSinceCapture++;
     }
 
-    return movesSinceCapture >= 120;
+    const isDraw = movesSinceCapture >= 120;
+    if (isDraw) {
+      console.log('📊 60回合无吃子判和:', { movesSinceCapture });
+    }
+
+    return isDraw;
   }
 
   isDrawByRepetition(history: GameHistory): boolean {
@@ -30,6 +47,17 @@ export class DrawDetector {
       }
     }
 
-    return repetitionCount >= 3;
+    const isDraw = repetitionCount >= 3;
+
+    if (isDraw) {
+      console.log('🔁 三次重复局面判和:', {
+        currentHash,
+        repetitionCount,
+        allHashes: hashes,
+        uniqueHashes: new Set(hashes).size
+      });
+    }
+
+    return isDraw;
   }
 }

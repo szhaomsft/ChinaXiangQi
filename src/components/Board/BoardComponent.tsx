@@ -5,7 +5,7 @@ import { getPieceDisplayName } from '../../types';
 import './BoardComponent.css';
 
 export function BoardComponent() {
-  const { board, selectPosition, selectedPosition, validMoves, gameStatus, isAIThinking } = useGame();
+  const { board, selectPosition, selectedPosition, validMoves, gameStatus, isAIThinking, lastMove } = useGame();
 
   const handleIntersectionClick = (x: number, y: number) => {
     if (isAIThinking) return;
@@ -21,6 +21,14 @@ export function BoardComponent() {
     return validMoves.some(p => p.x === x && p.y === y);
   };
 
+  const isLastMoveFrom = (x: number, y: number) => {
+    return lastMove?.from.x === x && lastMove?.from.y === y;
+  };
+
+  const isLastMoveTo = (x: number, y: number) => {
+    return lastMove?.to.x === x && lastMove?.to.y === y;
+  };
+
   // 计算交叉点位置 (x: 0-8, y: 0-9)
   const getIntersectionPosition = (x: number, y: number) => {
     return {
@@ -31,6 +39,14 @@ export function BoardComponent() {
 
   return (
     <div className="board-container">
+      {isAIThinking && (
+        <div className="ai-thinking-overlay">
+          <div className="ai-thinking-message">
+            <div className="spinner"></div>
+            <span>AI思考中...</span>
+          </div>
+        </div>
+      )}
       <div className="board">
         <div className="board-grid">
           {/* 绘制横线 (10条) */}
@@ -88,11 +104,13 @@ export function BoardComponent() {
               const piece = board.getPiece(new Position(x, y));
               const selected = isSelected(x, y);
               const valid = isValidMove(x, y);
+              const lastFrom = isLastMoveFrom(x, y);
+              const lastTo = isLastMoveTo(x, y);
 
               return (
                 <div
                   key={`${x}-${y}`}
-                  className={`intersection ${selected ? 'selected' : ''} ${valid ? 'valid-move' : ''}`}
+                  className={`intersection ${selected ? 'selected' : ''} ${valid ? 'valid-move' : ''} ${lastFrom ? 'last-move-from' : ''} ${lastTo ? 'last-move-to' : ''}`}
                   style={{
                     left: `${pos.left}px`,
                     top: `${pos.top}px`
@@ -100,7 +118,7 @@ export function BoardComponent() {
                   onClick={() => handleIntersectionClick(x, y)}
                 >
                   {piece && (
-                    <div className={`piece ${piece.color.toLowerCase()}`}>
+                    <div className={`piece ${piece.color.toLowerCase()} ${lastTo ? 'piece-moved' : ''}`}>
                       {getPieceDisplayName(piece.type, piece.color)}
                     </div>
                   )}

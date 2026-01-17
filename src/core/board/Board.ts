@@ -33,6 +33,8 @@ export class Board {
   setPiece(pos: Position, piece: Piece | null): void {
     if (!pos.isValid()) return;
 
+    const oldHash = this._hash;
+
     // 移除旧棋子的哈希贡献
     const oldPiece = this.pieces[pos.y][pos.x];
     if (oldPiece) {
@@ -63,6 +65,17 @@ export class Board {
           this.blackKingPos = null;
         }
       }
+    }
+
+    // 只在调试模式下记录（避免性能影响）
+    if (oldHash !== this._hash && typeof window !== 'undefined' && (window as any).DEBUG_ZOBRIST) {
+      console.log('🔢 Zobrist哈希更新:', {
+        position: pos.toString(),
+        oldPiece: oldPiece ? `${oldPiece.color} ${oldPiece.type}` : 'none',
+        newPiece: piece ? `${piece.color} ${piece.type}` : 'none',
+        oldHash: '0x' + oldHash.toString(16),
+        newHash: '0x' + this._hash.toString(16)
+      });
     }
   }
 

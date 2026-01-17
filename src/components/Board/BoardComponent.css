@@ -2,6 +2,50 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+}
+
+/* AI思考中的遮罩层 */
+.ai-thinking-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  border-radius: 10px;
+}
+
+.ai-thinking-message {
+  background: white;
+  padding: 20px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 加载动画 */
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .board {
@@ -35,14 +79,14 @@
   background: #8b4513;
 }
 
-/* 楚河汉界之间的竖线只画上下半段 */
+/* 楚河汉界之间的竖线只画上下半段，中间留空 */
 .vertical-line.split-top {
-  height: 315px; /* 到第4.5行 */
+  height: 280px; /* 到第4行（y=0到y=4，共5个交点，4格×70px） */
 }
 
 .vertical-line.split-bottom {
-  top: 315px;
-  height: 315px; /* 从第4.5行开始 */
+  top: 350px;     /* 从第5行开始（y=5，5×70px） */
+  height: 280px;  /* 从第5行到第9行（共5个交点，4格×70px） */
 }
 
 .vertical-line.full {
@@ -150,6 +194,28 @@
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
 
+/* 最后一步移动的起点高亮 */
+.intersection.last-move-from {
+  background-color: rgba(255, 200, 100, 0.5);
+  box-shadow: inset 0 0 10px rgba(255, 150, 0, 0.3);
+}
+
+/* 最后一步移动的终点高亮 */
+.intersection.last-move-to {
+  background-color: rgba(255, 150, 50, 0.6);
+  animation: pulse 1.5s ease-in-out;
+  box-shadow: inset 0 0 15px rgba(255, 100, 0, 0.4);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 150, 50, 0.7), inset 0 0 15px rgba(255, 100, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(255, 150, 50, 0), inset 0 0 15px rgba(255, 100, 0, 0.4);
+  }
+}
+
 /* 棋子 */
 .piece {
   width: 60px;
@@ -170,6 +236,25 @@
 .piece:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+/* 刚移动的棋子添加动画效果 */
+.piece.piece-moved {
+  animation: piece-move-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes piece-move-in {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .piece.red {

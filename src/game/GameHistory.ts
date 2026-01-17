@@ -1,4 +1,4 @@
-import { Move } from '../move/Move';
+import { Move } from '../core/move/Move';
 
 export class GameHistory {
   private moves: Move[] = [];
